@@ -25,15 +25,14 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
              radial-gradient(46rem 34rem at 98% 4%,rgba(255,46,107,.10),transparent 62%)}
 
 /* host-set custom backdrop */
-.bg{position:fixed;inset:0;z-index:0;pointer-events:none;background-size:cover;background-position:center;
-  opacity:0;transition:opacity .5s ease;--bgb:.4}
-.bg.on{opacity:var(--bgb)}
+.bg{position:fixed;inset:0;z-index:1;pointer-events:none;background-size:cover;background-position:center;
+  opacity:0;transition:opacity .5s ease}
 .bg::after{content:'';position:absolute;inset:0;
   background:linear-gradient(rgba(10,6,17,.55),rgba(10,6,17,.78))}
 body.hasbg .field img{opacity:.03}
 body.hasbg::before{opacity:.55}
 
-.field{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.field{position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden}
 .field img{position:absolute;opacity:.06;will-change:transform}
 .field img:nth-child(1){width:210px;top:8%;left:5%;animation:drift 34s ease-in-out infinite}
 .field img:nth-child(2){width:150px;top:62%;left:12%;animation:drift2 44s ease-in-out infinite}
@@ -44,7 +43,7 @@ body.hasbg::before{opacity:.55}
 @keyframes drift{0%,100%{transform:translate3d(0,0,0) rotate(-5deg)}50%{transform:translate3d(34px,-46px,0) rotate(5deg)}}
 @keyframes drift2{0%,100%{transform:translate3d(0,0,0) rotate(6deg)}50%{transform:translate3d(-40px,38px,0) rotate(-4deg)}}
 
-.wrap{position:relative;z-index:1;width:min(1240px,100%);margin:0 auto;padding:18px 20px 40px;flex:1;display:flex;flex-direction:column}
+.wrap{position:relative;z-index:3;width:min(1240px,100%);margin:0 auto;padding:18px 20px 40px;flex:1;display:flex;flex-direction:column}
 
 header{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding-bottom:18px}
 .brand{display:flex;align-items:center;gap:12px;margin-right:auto}
@@ -301,12 +300,17 @@ function readBg(v){
 }
 function applyBg(v){
   const el=$("#bg"), bg=readBg(v);
+  console.log("[epal] background received:",v,"->",bg);
   if(bg){
+    const img=new Image();                       // confirm it actually loads
+    img.onerror=()=>console.warn("[epal] background image failed to load:",bg.url);
+    img.src=bg.url;
     el.style.backgroundImage=`url("${String(bg.url).replace(/"/g,"%22")}")`;
-    el.style.setProperty("--bgb",(Math.max(0,Math.min(100,bg.b))/100).toFixed(2));
+    el.style.opacity=(Math.max(0,Math.min(100,bg.b))/100).toFixed(2);  // inline beats any CSS
     el.classList.add("on"); document.body.classList.add("hasbg");
   }else{
-    el.classList.remove("on"); document.body.classList.remove("hasbg"); el.style.backgroundImage="";
+    el.classList.remove("on"); document.body.classList.remove("hasbg");
+    el.style.opacity="0"; el.style.backgroundImage="";
   }
 }
 
