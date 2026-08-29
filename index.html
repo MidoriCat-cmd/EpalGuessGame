@@ -26,8 +26,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 
 /* host-set custom backdrop */
 .bg{position:fixed;inset:0;z-index:0;pointer-events:none;background-size:cover;background-position:center;
-  opacity:0;transition:opacity .7s ease}
-.bg.on{opacity:.4}
+  opacity:0;transition:opacity .5s ease;--bgb:.4}
+.bg.on{opacity:var(--bgb)}
 .bg::after{content:'';position:absolute;inset:0;
   background:linear-gradient(rgba(10,6,17,.55),rgba(10,6,17,.78))}
 body.hasbg .field img{opacity:.03}
@@ -291,11 +291,23 @@ function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");cl
 function setStatus(cls,txt){ $("#dot").className="dot"+(cls?" "+cls:""); $("#syncTxt").textContent=txt }
 const X_SVG=`<svg class="stamp" viewBox="0 0 100 100" aria-hidden="true"><g stroke="var(--strike)" stroke-width="13" stroke-linecap="round"><line x1="24" y1="21" x2="77" y2="80"/><line x1="78" y1="23" x2="22" y2="78"/></g></svg>`;
 
-function applyBg(url){
-  const el=$("#bg");
-  if(url){ el.style.backgroundImage=`url("${String(url).replace(/"/g,"%22")}")`;
-           el.classList.add("on"); document.body.classList.add("hasbg") }
-  else{ el.classList.remove("on"); document.body.classList.remove("hasbg"); el.style.backgroundImage="" }
+/* The host may send either a plain URL (older versions) or
+   {url, b} where b is 0-100 brightness. Accept both. */
+function readBg(v){
+  if(!v) return null;
+  if(typeof v==="string") return {url:v,b:40};
+  if(v.url) return {url:v.url,b:typeof v.b==="number"?v.b:40};
+  return null;
+}
+function applyBg(v){
+  const el=$("#bg"), bg=readBg(v);
+  if(bg){
+    el.style.backgroundImage=`url("${String(bg.url).replace(/"/g,"%22")}")`;
+    el.style.setProperty("--bgb",(Math.max(0,Math.min(100,bg.b))/100).toFixed(2));
+    el.classList.add("on"); document.body.classList.add("hasbg");
+  }else{
+    el.classList.remove("on"); document.body.classList.remove("hasbg"); el.style.backgroundImage="";
+  }
 }
 
 /* ---------- board ---------- */
