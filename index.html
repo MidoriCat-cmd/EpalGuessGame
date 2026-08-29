@@ -292,8 +292,20 @@ const X_SVG=`<svg class="stamp" viewBox="0 0 100 100" aria-hidden="true"><g stro
    {url, b} where b is 0-100 brightness. Accept both. */
 function readBg(v){
   if(!v) return null;
-  if(typeof v==="string") return {url:v,b:55};
-  if(v.url) return {url:v.url,b:typeof v.b==="number"?v.b:55};
+  // Depending on the column type this can arrive as an object, or as
+  // JSON that is still a string. Unwrap it before doing anything else.
+  if(typeof v==="string"){
+    const s=v.trim();
+    if(s.startsWith("{")||s.startsWith("\"")){
+      try{ v=JSON.parse(s) }catch(e){ return {url:s,b:55} }
+      return readBg(v);
+    }
+    return {url:s,b:55};                       // a plain link
+  }
+  if(typeof v==="object" && v.url){
+    const b=Number(v.b);
+    return {url:String(v.url),b:Number.isFinite(b)?b:55};
+  }
   return null;
 }
 function applyBg(v){
