@@ -144,9 +144,6 @@ footer{margin-top:auto;padding-top:26px;color:var(--dim);font-size:12px;display:
   stroke-linejoin:round;position:relative;filter:drop-shadow(0 0 26px currentColor)}
 .verdict.ok svg{stroke:var(--live);color:var(--live)}
 .verdict.no svg{stroke:var(--strike);color:var(--strike)}
-.verdict #vOk,.verdict #vNo{display:none}
-.verdict.ok #vOk{display:block}
-.verdict.no #vNo{display:block}
 .verdict.show svg{animation:vpop .5s cubic-bezier(.2,1.5,.4,1)}
 @keyframes vpop{0%{transform:scale(.4) rotate(-12deg);opacity:0}60%{opacity:1}100%{transform:none;opacity:1}}
 .verdict svg path,.verdict svg line{stroke-dasharray:200;stroke-dashoffset:200}
@@ -234,10 +231,7 @@ footer{margin-top:auto;padding-top:26px;color:var(--dim);font-size:12px;display:
 </div>
 
 <!-- verdict flash -->
-<div class="verdict" id="verdict" aria-hidden="true">
-  <svg id="vOk" viewBox="0 0 100 100" hidden><path d="M22 52l20 20 37-44"/></svg>
-  <svg id="vNo" viewBox="0 0 100 100" hidden><line x1="26" y1="26" x2="74" y2="74"/><line x1="74" y1="26" x2="26" y2="74"/></svg>
-</div>
+<div class="verdict" id="verdict" aria-hidden="true"></div>
 
 <!-- answer reveal -->
 <div class="reveal" id="reveal">
@@ -362,15 +356,19 @@ function tick(){
 setInterval(tick,200);
 
 /* ---------- verdict ---------- */
+const ICON_OK=`<svg viewBox="0 0 100 100"><path d="M22 52l20 20 37-44"/></svg>`;
+const ICON_NO=`<svg viewBox="0 0 100 100"><line x1="26" y1="26" x2="74" y2="74"/><line x1="74" y1="26" x2="26" y2="74"/></svg>`;
 function showVerdict(v){
   if(!v||!v.at||v.at===lastVerdict) return;
   lastVerdict=v.at;
   const el=$("#verdict"), ok=v.type==="correct";
-  el.className="verdict"; void el.offsetWidth;
+  el.className="verdict";
+  el.innerHTML = ok?ICON_OK:ICON_NO;   // only ever one icon in the DOM
+  void el.offsetWidth;
   el.className="verdict show "+(ok?"ok":"no");
-  setTimeout(()=>{ el.className="verdict" },2300);
+  clearTimeout(el._t);
+  el._t=setTimeout(()=>{ el.className="verdict"; el.innerHTML="" },2300);
 }
-
 /* ---------- reveal ---------- */
 function showReveal(ans,id){
   if(!ans) return;
