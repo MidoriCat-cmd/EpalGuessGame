@@ -27,8 +27,6 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 /* host-set custom backdrop */
 .bg{position:fixed;inset:0;z-index:1;pointer-events:none;background-size:cover;background-position:center;
   opacity:0;transition:opacity .5s ease}
-.bg::after{content:'';position:absolute;inset:0;
-  background:linear-gradient(rgba(10,6,17,.55),rgba(10,6,17,.78))}
 body.hasbg .field img{opacity:.03}
 body.hasbg::before{opacity:.55}
 
@@ -294,8 +292,8 @@ const X_SVG=`<svg class="stamp" viewBox="0 0 100 100" aria-hidden="true"><g stro
    {url, b} where b is 0-100 brightness. Accept both. */
 function readBg(v){
   if(!v) return null;
-  if(typeof v==="string") return {url:v,b:40};
-  if(v.url) return {url:v.url,b:typeof v.b==="number"?v.b:40};
+  if(typeof v==="string") return {url:v,b:55};
+  if(v.url) return {url:v.url,b:typeof v.b==="number"?v.b:55};
   return null;
 }
 function applyBg(v){
